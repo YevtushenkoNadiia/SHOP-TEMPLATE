@@ -1,53 +1,41 @@
-const contentContainer = document.querySelector('#content-container');
-const cartCounterLabel = document.querySelector('#cart-counter-label');
+const cartCounterLabel = document.querySelector('#cart-counter-label'); //получили кнопку корзины
+const buttonsContainer = document.querySelector('#content-container'); //получили кнопку добавить в корзину
 
 let cartCounter = 0;
-let cartPrice = 0;
+let priceCounter = 0;
 
-const incrementCounter = () => {
-  cartCounterLabel.innerHTML = `${++cartCounter}`;
-  if (cartCounter === 1) cartCounterLabel.style.display = 'block';
-};
-
-const getMockData = (t) => +t.parentElement
-  .previousElementSibling
-  .innerHTML
-  .replace(/^\$(\d+)\s\D+(\d+).*$/u, '$1.$2');
-
-const getPrice = (t, price) => Math.round((price + getMockData(t)) * 100) / 100;
-
-const disableControls = (t, fn) => {
-  contentContainer.removeEventListener('click', fn);
-  t.disabled = true;
-};
-
-const enableControls = (t, fn) => {
-  contentContainer.addEventListener('click', fn);
-  t.disabled = false;
-};
-
-const btnClickHandler = (e) => {
+let btnClickHandler = (e) => {
   const target = e.target;
-  const interval = 2000;
-
-  let restoreHTML = null;
-
+  let restoreHTML;
+  
   if (target && target.matches('.item-actions__cart')) {
+    cartCounterLabel.innerHTML = `${++cartCounter}`;
+    if (cartCounter === 1) cartCounterLabel.style.display = 'block';
 
-    incrementCounter();
+    //получили кнопку корзины target = то, на что кликаем
+    //parentElement - чтобы выйти на родителя
+    //previousElementSibling - подняться на уровень выше
 
-    cartPrice = getPrice(target, cartPrice);
+    const mockData = +target
+    .parentElement
+    .previousElementSibling
+    .innerHTML
+    .replace(/\$(\d+)\s\D+(\d+).*$/, '$1.$2');
+
+    priceCounter = Math.round((priceCounter + mockData) * 100) / 100;
+
     restoreHTML = target.innerHTML;
-
-    target.innerHTML = `Added ${cartPrice.toFixed(2)} $`;
-
-    disableControls(target, btnClickHandler);
+    target.innerHTML =  `Added ${priceCounter.toFixed(2)}`;
+    target.disabled = true;
+    buttonsContainer.removeEventListener('click', btnClickHandler);
 
     setTimeout(() => {
-      target.innerHTML = restoreHTML;
-      enableControls(target, btnClickHandler);
-    }, interval);
-  }
-};
+      target.innerHTML = restoreHTML; //вернуть текст
+      target.disabled = false;
+      buttonsContainer.addEventListener('click', btnClickHandler);
+      }, 2000);
+    }
+  };
 
-contentContainer.addEventListener('click', btnClickHandler);
+buttonsContainer.addEventListener('click', btnClickHandler);
+
